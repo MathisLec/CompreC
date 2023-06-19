@@ -4,16 +4,31 @@
 #define WIN_HEIGHT_RATIO 50
 
 const char* MAIN_OPTIONS[4] ={"3","1. New Game", "2. Load Game", "3. Exit"};
+WINDOW* main_win;
+int selectedOption = 1;
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void destroy_win(WINDOW *local_win);
 
 void printOptionsInWindow(WINDOW *win, const char **options, int size){
-	int i;
-	for(i = 1; i < size; i++){
-		mvwprintw(win, i + 1, 1, options[i]);
+	//Compute the middle of the local window
+	int middleY = (getmaxy(win) / 2) - (size / 2);
+	//Compute the offset between each options horizontally in the local window
+	int offset = 50;
+	//Print the options horizontally in the local window with the same offset between each options
+	for(int i = 1; i <= size; i++){
+		if(i == selectedOption){
+			//Highlight the selected option
+			wattron(win, A_REVERSE);
+			mvwprintw(win, middleY, 0 + (i-1 * offset), options[i]);
+			wattroff(win, A_REVERSE);
+		}else{
+			mvwprintw(win, middleY, 0 + (i-1 * offset), options[i]);
+		}
 	}
+	
 	wrefresh(win);
+	
 }
 
 void initWindow(WINDOW *win){
@@ -40,31 +55,29 @@ void initWindow(WINDOW *win){
 	printOptionsInWindow(win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
 }
 
+void keypadManager(int key){
+	switch (key)
+	{
+	case KEY_RIGHT:
+		//Select the next option
+		if(selectedOption < atoi(MAIN_OPTIONS[0])){
+			selectedOption++;
+		}
+		break;
+	
+	default:
+		break;
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	WINDOW* main_win;
 	initWindow(main_win);
 
-	int ch;
-	while((ch = getch()) != KEY_F(1))
-	{	switch(ch)
-		{	case KEY_LEFT:
-				//destroy_win(my_win);
-				//my_win = create_newwin(height, width, starty,--startx);
-				break;
-			case KEY_RIGHT:
-				//destroy_win(my_win);
-				//my_win = create_newwin(height, width, starty,++startx);
-				break;
-			case KEY_UP:
-				//destroy_win(my_win);
-				//my_win = create_newwin(height, width, --starty,startx);
-				break;
-			case KEY_DOWN:
-				//destroy_win(my_win);
-				//my_win = create_newwin(height, width, ++starty,startx);
-				break;	
-		}
+	int key;
+	while((key = getch()) != KEY_F(1))
+	{	
+		keypadManager(key);
 	}
 	//End curses mode
 	endwin();
