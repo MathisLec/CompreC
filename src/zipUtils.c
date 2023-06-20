@@ -10,15 +10,13 @@ int isZipProtected(const char* filepath){
 
     struct zip* zip = zip_open(filepath, ZIP_RDONLY, NULL);
     if (zip != NULL) {
+        //Get the number of entries in the zip
         int numEntries = zip_get_num_entries(zip, 0);
         for (int i = 0; i < numEntries; i++) {
             struct zip_stat fileStat;
             zip_stat_init(&fileStat);
             zip_stat_index(zip, i, 0, &fileStat);
-            //Check if zip is protected 
-            printf("%ld\n", fileStat.flags);
-            if(fileStat.flags & ZIP_STAT_ENCRYPTION_METHOD){
-                printf("HELLOOOO");
+            if(fileStat.encryption_method > 0){
                 isProtected = 1;
                 break;
             }
@@ -27,7 +25,7 @@ int isZipProtected(const char* filepath){
     }
     else{
         printf("Error while opening the zip file\n");
+        return -1;
     }
-
     return isProtected;
 }
