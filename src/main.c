@@ -12,6 +12,7 @@ void initMainWindow(WINDOW* win);
 void initBorderWindow(WINDOW* win);
 void keypadManager(int key);
 
+const char* figlet = "  ____                                ____ \n / ___|___  _ __ ___  _ __  _ __ ___ / ___|\n| |   / _ \\| '_ ` _ \\| '_ \\| '__/ _ \\ |    \n| |__| (_) | | | | | | |_) | | |  __/ |___ \n \\____\\___/|_| |_| |_| .__/|_|  \\___|\\____|\n                     |_|                   \n";
 const char* MAIN_OPTIONS[4] ={"3","1. New Game", "2. Load Game", "3. Exit"};
 WINDOW* border_win;
 WINDOW* main_win;
@@ -21,8 +22,17 @@ void init(){
 	//Disable cursor
 	curs_set(0);
 	//Print exit key
-	printw("Press F1 to exit");
+	printw("Press F1 to exit\n");
+	
+	//Get the middle of the terminal to print the figlet (with a little offset)
+	int middlex = (getmaxx(stdscr) / 2) - 22;
+	//Create a new window in the middle of the terminal to print the figlet
+	WINDOW* figletWin = newwin(10, 86, 1, middlex);
+	wprintw(figletWin, figlet);
+	//Refresh the main window
 	refresh();
+	//Refresh the figlet window
+	wrefresh(figletWin);
 }
 
 void cleanWindowContent(WINDOW *win){
