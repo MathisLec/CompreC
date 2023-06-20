@@ -2,8 +2,11 @@
 #include "interface.h"
 #include "zipUtils.h"
 #include <getopt.h>
+#include <locale.h>
 
-char* filepath;
+char* filepath = "";
+char* password = "";
+int isProtected = 0;
 
 void printUsage(){
 	printf("Usage: ./compreC [-h] [-f file]\n");
@@ -15,7 +18,7 @@ void printUsage(){
 //Function that parse input options with getopt
 void parseOpt(int argc, char* argv){
 	int opt;
-	while((opt = getopt(argc, argv,"hf:")) != -1){
+	while((opt = getopt(argc, argv,"hf:p:")) != -1){
 		switch(opt){
 			case 'h':
 				printUsage();
@@ -23,7 +26,9 @@ void parseOpt(int argc, char* argv){
 				break;
 			case 'f':
 				filepath = optarg;
-				checkZip();
+				break;
+			case 'p':
+				password = optarg;
 				break;
 			default:
 				printUsage();
@@ -31,15 +36,18 @@ void parseOpt(int argc, char* argv){
 				break;
 		}
 	}
-
+	if(filepath != ""){
+		checkZip();
+	}
 }
 
 void checkZip(){
 	if(isZipProtected(filepath)){
-		printf("The zip is protected\n");
-	}else{
-		printf("The zip is not protected\n");
+		isProtected = 1;
 	}
+	else if(password != "")
+		printf("Password provided but the file is not protected\n");
+	
 }
 
 /**
@@ -47,7 +55,11 @@ void checkZip(){
 */
 int main(int argc, char *argv[])
 {
+	//Set UTF-8 locale
+	setlocale(LC_ALL, "");
+	//Parse options
 	parseOpt(argc, argv);
-	//launchInterface();
+	//Launch the interface
+	launchInterface(isProtected, (strlen(password) ? 1 : 0) );
 	return 0;
 }

@@ -6,4 +6,4 @@ add_executable(compreC main.c interface.c zipUtils.c)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(compreC ncurses menu zip) 
+target_link_libraries(compreC ncursesw menu zip) 

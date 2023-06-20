@@ -19,8 +19,11 @@ void keypadManager(int key);
 */
 const char* figlet = "  ____                                ____ \n / ___|___  _ __ ___  _ __  _ __ ___ / ___|\n| |   / _ \\| '_ ` _ \\| '_ \\| '__/ _ \\ |    \n| |__| (_) | | | | | | |_) | | |  __/ |___ \n \\____\\___/|_| |_| |_| .__/|_|  \\___|\\____|\n                     |_|                   \n";
 
-const char* MAIN_OPTIONS_WITH_PASSWORD[5] ={"4","BruteForce", "Password", "Explore", "Exit"};
+const char* MAIN_OPTIONS_PROTECTED[5] ={"4","BruteForce", "Enter password", "Explore", "Exit"};
 const char* MAIN_OPTIONS[3] ={"2","Explore", "Exit"};
+
+int protectedFlag = 0;
+int passwordFlag = 0;
 
 /**
  * Global windows and variables
@@ -37,7 +40,10 @@ int selectedOption = 1;
  * Init functions
 */
 
-void init(){
+void init(int isProtected, int hasPassword){
+	protectedFlag = isProtected;
+	passwordFlag = hasPassword;
+
 	//Disable cursor
 	curs_set(0);
 
@@ -53,6 +59,16 @@ void init(){
 	WINDOW* figletWin = newwin(10, 86, 1, middlex);
 	wprintw(figletWin, figlet);
 
+    if(isProtected){
+        mvprintw(7,1,"🔒 Zip protected.");
+    }
+    else{
+        mvprintw(7,1,"🔓 Zip not protected.");
+    }
+    if(hasPassword){
+        mvprintw(8,1,"🔑 Password provided.");
+    }
+
 	//Refresh the main window
 	refresh();
 	//Refresh the figlet window
@@ -65,7 +81,13 @@ void initBorderWindow(WINDOW* win)
 }
 
 void initMainWindow(WINDOW* win){
-	printOptionsInWindow(win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
+    if(protectedFlag)
+        if(passwordFlag)
+            printOptionsInWindow(win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
+		else
+			printOptionsInWindow(win, MAIN_OPTIONS_PROTECTED, atoi(MAIN_OPTIONS_PROTECTED[0]));
+    else
+	    printOptionsInWindow(win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
 }
 
 /**
@@ -119,7 +141,7 @@ WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*)){
 	
 	//Compute startx and starty
 	startx = (termWidth - width) / 2;
-	starty = (termHeight - height) / 2;
+	starty = (termHeight - height) / 2 + 4; // Middle of the terminal, +4 to have a little offset
 	if(winFunc == initBorderWindow){
 		startx--;
 		starty--;
@@ -187,10 +209,10 @@ void closeApp(){
 	endwin();
 }
 
-void launchInterface(){
+void launchInterface(int isProtected, int hasPassword){
     //Start curses mode
 	initscr();
-	init();
+	init(isProtected, hasPassword);
 	//Disable line buffering
 	cbreak();
 	//Don't show the user's input

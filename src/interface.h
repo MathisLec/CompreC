@@ -1,1 +1,1 @@
-void launchInterface();
+void launchInterface(int isProtected, int hasPassword);
