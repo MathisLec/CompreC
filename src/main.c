@@ -3,6 +3,9 @@
 #define WIN_WIDTH_RATIO 70
 #define WIN_HEIGHT_RATIO 50
 
+/**
+ * Functions declaration
+*/
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void printOptionsInWindow(WINDOW *win, const char **options, int size);
 void updateWindow(WINDOW *win, const char **options, int size);
@@ -12,15 +15,36 @@ void initMainWindow(WINDOW* win);
 void initBorderWindow(WINDOW* win);
 void keypadManager(int key);
 
+/**
+ * Const string to print
+*/
 const char* figlet = "  ____                                ____ \n / ___|___  _ __ ___  _ __  _ __ ___ / ___|\n| |   / _ \\| '_ ` _ \\| '_ \\| '__/ _ \\ |    \n| |__| (_) | | | | | | |_) | | |  __/ |___ \n \\____\\___/|_| |_| |_| .__/|_|  \\___|\\____|\n                     |_|                   \n";
-const char* MAIN_OPTIONS[4] ={"3","1. New Game", "2. Load Game", "3. Exit"};
+
+const char* MAIN_OPTIONS_WITH_PASSWORD[5] ={"4","BruteForce", "Password", "Explore", "Exit"};
+const char* MAIN_OPTIONS[3] ={"2","Explore", "Exit"};
+
+/**
+ * Global windows and variables
+*/
 WINDOW* border_win;
 WINDOW* main_win;
 int selectedOption = 1;
 
+/**
+ * Functions implementation
+*/
+
+/**
+ * Init functions
+*/
+
 void init(){
 	//Disable cursor
 	curs_set(0);
+
+	/**
+	 * Print in the general window
+	*/
 	//Print exit key
 	printw("Press F1 to exit\n");
 	
@@ -29,21 +53,29 @@ void init(){
 	//Create a new window in the middle of the terminal to print the figlet
 	WINDOW* figletWin = newwin(10, 86, 1, middlex);
 	wprintw(figletWin, figlet);
+	
 	//Refresh the main window
 	refresh();
 	//Refresh the figlet window
 	wrefresh(figletWin);
 }
 
+void initBorderWindow(WINDOW* win)
+{	
+	box(win, 0 , 0);
+}
+
+void initMainWindow(WINDOW* win){
+	printOptionsInWindow(win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
+}
+
+/**
+ * Window utils functions
+*/
+
 void cleanWindowContent(WINDOW *win){
 	wclear(win);
 	wrefresh(win);
-}
-
-void updateWindow(WINDOW *win, const char **options, int size){
-
-	cleanWindowContent(win);
-	printOptionsInWindow(win, options, size);
 }
 
 void printOptionsInWindow(WINDOW *win, const char **options, int size){
@@ -65,6 +97,12 @@ void printOptionsInWindow(WINDOW *win, const char **options, int size){
 	
 	wrefresh(win);
 	
+}
+
+void updateWindow(WINDOW *win, const char **options, int size){
+
+	cleanWindowContent(win);
+	printOptionsInWindow(win, options, size);
 }
 
 WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*)){
@@ -95,14 +133,9 @@ WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*)){
 
 }
 
-void initBorderWindow(WINDOW* win)
-{	
-	box(win, 0 , 0);
-}
-
-void initMainWindow(WINDOW* win){
-	printOptionsInWindow(win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
-}
+/**
+ * Application General utils functions
+*/
 
 void keypadManager(int key){
 	switch (key)
@@ -121,6 +154,10 @@ void keypadManager(int key){
 		break;
 	}
 }
+
+/**
+ * Main function
+*/
 
 int main(int argc, char *argv[])
 {
