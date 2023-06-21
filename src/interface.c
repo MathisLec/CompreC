@@ -19,8 +19,9 @@ void keypadManager(int key);
 */
 const char* figlet = "  ____                                ____ \n / ___|___  _ __ ___  _ __  _ __ ___ / ___|\n| |   / _ \\| '_ ` _ \\| '_ \\| '__/ _ \\ |    \n| |__| (_) | | | | | | |_) | | |  __/ |___ \n \\____\\___/|_| |_| |_| .__/|_|  \\___|\\____|\n                     |_|                   \n";
 
-const char* MAIN_OPTIONS_PROTECTED[5] ={"4","BruteForce", "Enter password", "Explore", "Exit"};
+const char* MAIN_OPTIONS_PROTECTED[5] ={"4","BruteForce", "Password", "Explore", "Exit"};
 const char* MAIN_OPTIONS[3] ={"2","Explore", "Exit"};
+const char** currentOptionsSet;
 
 int protectedFlag = 0;
 int passwordFlag = 0;
@@ -43,6 +44,11 @@ int selectedOption = 1;
 void init(int isProtected, int hasPassword){
 	protectedFlag = isProtected;
 	passwordFlag = hasPassword;
+
+	if(isProtected && !hasPassword)
+		currentOptionsSet = MAIN_OPTIONS_PROTECTED;
+	else
+		currentOptionsSet = MAIN_OPTIONS;
 
 	//Disable cursor
 	curs_set(0);
@@ -81,13 +87,7 @@ void initBorderWindow(WINDOW* win)
 }
 
 void initMainWindow(WINDOW* win){
-    if(protectedFlag)
-        if(passwordFlag)
-            printOptionsInWindow(win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
-		else
-			printOptionsInWindow(win, MAIN_OPTIONS_PROTECTED, atoi(MAIN_OPTIONS_PROTECTED[0]));
-    else
-	    printOptionsInWindow(win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
+	printOptionsInWindow(win, currentOptionsSet, atoi(currentOptionsSet[0]));
 }
 
 /**
@@ -103,24 +103,25 @@ void printOptionsInWindow(WINDOW *win, const char **options, int size){
 	//Compute the middle of the local window
 	int middleY = getmaxy(win) / 2;
 	int middleX = getmaxx(win) / 2;
-	//Compute the offset between each options horizontally in the local window
-	int offset = getmaxx(win) / size;
 	//Print the description of this window
 	const char* description = "Select an option (<- or ->) and press Enter";
 	mvwprintw(win, 1, middleX - (strlen(description) / 2), description);
+	//Compute the offset between each options horizontally in the local window
+	int offset = spaceBetweenEachOption(win, options);
 	//Print the options horizontally in the local window with the same offset between each options
 	for(int i = 1; i <= size; i++){
 		if(i == selectedOption){
 			//Highlight the selected option
 			wattron(win, A_REVERSE);
-			mvwprintw(win, middleY, 1 + (i * offset)/size, options[i]);
+			mvwprintw(win, middleY, 1 + (i * offset), options[i]);
 			wattroff(win, A_REVERSE);
 		}else{
-			mvwprintw(win, middleY, 1 + (i * offset)/size, options[i]);
+			mvwprintw(win, middleY, 1 + (i * offset), options[i]);
 		}
 	}
 	
 	wrefresh(win);
+	refresh();
 	
 }
 
@@ -162,21 +163,34 @@ WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*)){
  * Application General utils functions
 */
 
+int charNumber(char** options){
+	int number = 0;
+	for(int i = 1; i <= atoi(options[0]);i++){
+		number+=strlen(options[i]);
+	}
+	return number;
+}
+
+int spaceBetweenEachOption(WINDOW* win, char** options){
+	int charNum = charNumber(options);
+	return (getmaxx(win) - charNum) / atoi(options[0]);
+}
+
 void keypadManager(int key){
 	switch (key)
 	{
 	case KEY_RIGHT:
 		//Select the next option
-		if(selectedOption < atoi(MAIN_OPTIONS[0])){
+		if(selectedOption < atoi(currentOptionsSet[0])){
 			selectedOption++;
-			updateWindow(main_win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
+				updateWindow(main_win, currentOptionsSet, atoi(currentOptionsSet[0]));
 		}
 		break;
 	case KEY_LEFT:
 		//Select the previous option
 		if(selectedOption > 1){
 			selectedOption--;
-			updateWindow(main_win, MAIN_OPTIONS, atoi(MAIN_OPTIONS[0]));
+			updateWindow(main_win, currentOptionsSet, atoi(currentOptionsSet[0]));
 		}
 		break;
 	case KEY_ENTER:
