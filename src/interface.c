@@ -6,7 +6,7 @@
  * Functions declaration
 */
 WINDOW *create_newwin(int height, int width, int starty, int startx);
-void printOptionsInWindow(WINDOW *win, const char **options, int size);
+void printMainOptionsInWindow(WINDOW *win, const char **options, int size);
 void updateWindow(WINDOW *win, const char **options, int size);
 void cleanWindowContent(WINDOW *win);
 WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*));
@@ -25,6 +25,10 @@ const char** currentOptionsSet;
 
 int protectedFlag = 0;
 int passwordFlag = 0;
+
+char * localFilepath = "";
+
+char interfacePassword[100] = "";
 
 /**
  * Global windows and variables
@@ -87,7 +91,7 @@ void initBorderWindow(WINDOW* win)
 }
 
 void initMainWindow(WINDOW* win){
-	printOptionsInWindow(win, currentOptionsSet, atoi(currentOptionsSet[0]));
+	printMainOptionsInWindow(win, currentOptionsSet, atoi(currentOptionsSet[0]));
 }
 
 /**
@@ -99,7 +103,7 @@ void cleanWindowContent(WINDOW *win){
 	wrefresh(win);
 }
 
-void printOptionsInWindow(WINDOW *win, const char **options, int size){
+void printMainOptionsInWindow(WINDOW *win, const char **options, int size){
 	//Compute the middle of the local window
 	int middleY = getmaxy(win) / 2;
 	int middleX = getmaxx(win) / 2;
@@ -108,6 +112,12 @@ void printOptionsInWindow(WINDOW *win, const char **options, int size){
 	mvwprintw(win, 1, middleX - (strlen(description) / 2), description);
 	//Compute the offset between each options horizontally in the local window
 	int offset = spaceBetweenEachOption(win, options);
+	// Little adjustment for main options, it's hard
+	if(currentOptionsSet == MAIN_OPTIONS){
+		int percent = 32;
+		int toReduce = offset * percent / 100;
+		offset-=toReduce;
+	}
 	//Print the options horizontally in the local window with the same offset between each options
 	for(int i = 1; i <= size; i++){
 		if(i == selectedOption){
@@ -116,7 +126,11 @@ void printOptionsInWindow(WINDOW *win, const char **options, int size){
 			mvwprintw(win, middleY, 1 + (i * offset), options[i]);
 			wattroff(win, A_REVERSE);
 		}else{
+			wattron(win, A_BOLD);
+			wattron(win, A_UNDERLINE);
 			mvwprintw(win, middleY, 1 + (i * offset), options[i]);
+			wattroff(win, A_UNDERLINE);
+			wattroff(win, A_BOLD);
 		}
 	}
 	
@@ -125,10 +139,89 @@ void printOptionsInWindow(WINDOW *win, const char **options, int size){
 	
 }
 
+void drawPasswordBox(WINDOW* win){
+	int middleY = getmaxy(win) / 2;
+	char underline[1080] = "";
+	for(int i = 0; i < getmaxx(win)-2; i++){
+		underline[i] = '-';
+	}
+	//Underline the password characters
+	mvwprintw(win, middleY + 1, 1, underline);
+
+	//Borders for the password
+	//First Line
+	mvwaddch(win, middleY-1, 0, ACS_ULCORNER);
+	for(int i = 1; i < getmaxx(win)-1; i++){
+		mvwaddch(win, middleY-1, i, ACS_HLINE);
+	}
+    mvwaddch(win, middleY-1, getmaxx(win) - 1, ACS_URCORNER);
+	//Left and Right borders
+	mvwaddch(win, middleY, 0, ACS_VLINE);
+    mvwaddch(win, middleY, getmaxx(win) - 1, ACS_VLINE);
+	
+	mvwaddch(win, middleY+1, 0, ACS_VLINE);
+    mvwaddch(win, middleY+1, getmaxx(win) - 1, ACS_VLINE);
+	//Last Line
+	mvwaddch(win, middleY+2, 0, ACS_LLCORNER);
+	for(int i = 1; i < getmaxx(win)-1; i++){
+		mvwaddch(win, middleY+2, i, ACS_HLINE);
+	}
+	mvwaddch(win, middleY+2, getmaxx(win) - 1, ACS_LRCORNER);
+
+}
+
+void printPasswordOptionsInWindow(WINDOW *win){
+	//Compute the middle of the local window
+	int middleY = getmaxy(win) / 2;
+	int middleX = getmaxx(win) / 2;
+	
+	//Print the description of this window
+	const char* description = "Enter your password here";
+	mvwprintw(win, 1, middleX - (strlen(description) / 2), description);
+	//Reallow the input buffering and echo user's input
+	nocbreak();
+	echo();
+	
+	drawPasswordBox(win);
+	//Get the password from the user
+	mvwgetnstr(win, middleY, 1, interfacePassword,100);
+	if(isPasswordCorrect(localFilepath, interfacePassword)){
+		char* passwordCorrectMessage = "Password correct! Zip file unlocked!";
+		mvwprintw(win, getmaxy(win) - 3, middleX - (strlen(passwordCorrectMessage) / 2), passwordCorrectMessage);
+
+		char* indicationMessage = "Press Enter to continue.";
+		mvwprintw(win, getmaxy(win) - 2, middleX - (strlen(indicationMessage) / 2), indicationMessage);
+
+		currentOptionsSet = MAIN_OPTIONS;
+	}
+	else{
+		char* passwordIncorrectMessage = "Password incorrect! Try again!";
+		mvwprintw(win, getmaxy(win) - 3, middleX - (strlen(passwordIncorrectMessage) / 2), passwordIncorrectMessage);
+
+		char* indicationMessage = "Press Enter to continue.";
+		mvwprintw(win, getmaxy(win) - 2, middleX - (strlen(indicationMessage) / 2), indicationMessage);
+	}
+
+	//And disable the input buffering and echo user's input
+	noecho();
+	cbreak();
+
+	wrefresh(win);
+	refresh();
+	
+	//Wait until the user press enter
+	char c = getch();
+	while(c != KEY_ENTER && c != 10)
+		c = getch();
+	
+	cleanWindowContent(win);
+	printMainOptionsInWindow(win, currentOptionsSet, atoi(currentOptionsSet[0]));
+}
+
 void updateWindow(WINDOW *win, const char **options, int size){
 
 	cleanWindowContent(win);
-	printOptionsInWindow(win, options, size);
+	printMainOptionsInWindow(win, options, size);
 }
 
 WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*)){
@@ -176,6 +269,42 @@ int spaceBetweenEachOption(WINDOW* win, char** options){
 	return (getmaxx(win) - charNum) / atoi(options[0]);
 }
 
+void mainOptionsProtectedManager(){
+	switch (selectedOption)
+	{
+		case 1:
+			//BruteForce
+			break;
+		case 2:
+			//Password
+			cleanWindowContent(main_win);
+			printPasswordOptionsInWindow(main_win);
+			break;
+		case 3:
+			//Explore
+			break;
+		case 4:
+			closeApp();
+			exit(0);
+		default:
+			break;
+	}
+}
+
+void mainOptionsManager(){
+	switch (selectedOption)
+		{
+		case 1:
+			//Explore
+			break;
+		case 2:
+			closeApp();
+			exit(0);
+		default:
+			break;
+		}
+}
+
 void keypadManager(int key){
 	switch (key)
 	{
@@ -183,7 +312,8 @@ void keypadManager(int key){
 		//Select the next option
 		if(selectedOption < atoi(currentOptionsSet[0])){
 			selectedOption++;
-				updateWindow(main_win, currentOptionsSet, atoi(currentOptionsSet[0]));
+			updateWindow(main_win, currentOptionsSet, atoi(currentOptionsSet[0]));
+
 		}
 		break;
 	case KEY_LEFT:
@@ -195,19 +325,12 @@ void keypadManager(int key){
 		break;
 	case KEY_ENTER:
 	case 10:
-		//Execute the selected option
-		switch (selectedOption)
-		{
-		case 1:
-			//Explore
-			break;
-		case 2:
-			closeApp();
-			exit(0);
-		default:
-			break;
+		if(currentOptionsSet == MAIN_OPTIONS_PROTECTED){
+			mainOptionsProtectedManager();
 		}
-		break;
+		else if(currentOptionsSet == MAIN_OPTIONS){
+			mainOptionsManager();
+		}
 	default:
 		break;
 	}
@@ -223,9 +346,10 @@ void closeApp(){
 	endwin();
 }
 
-void launchInterface(int isProtected, int hasPassword){
+void launchInterface(const char* filePath, int isProtected, int hasPassword){
     //Start curses mode
 	initscr();
+	localFilepath = filePath;
 	init(isProtected, hasPassword);
 	//Disable line buffering
 	cbreak();

@@ -60,6 +60,6 @@ int main(int argc, char *argv[])
 	//Parse options
 	parseOpt(argc, argv);
 	//Launch the interface
-	launchInterface(isProtected, (strlen(password) ? 1 : 0) );
+	launchInterface(filepath,isProtected,(strlen(password) ? 1 : 0) );
 	return 0;
 }
