@@ -1,8 +1,5 @@
 #include "main.h"
-#include "interface.h"
-#include "zipUtils.h"
-#include <getopt.h>
-#include <locale.h>
+#include "main_internal.h"
 
 char* filepath = "";
 char* password = "";
@@ -16,7 +13,8 @@ void printUsage(){
 }
 
 //Function that parse input options with getopt
-void parseOpt(int argc, char* argv){
+
+void parseOpt(int argc, char** argv){
 	int opt;
 	while((opt = getopt(argc, argv,"hf:p:")) != -1){
 		switch(opt){
@@ -47,8 +45,8 @@ void checkZip(){
 	}
 	else if(password != "")
 		printf("Password provided but the file is not protected\n");
-	
 }
+
 
 /**
  * Main function

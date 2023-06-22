@@ -1,18 +1,11 @@
-#include <ncurses.h>
+#include "interface_internal.h"
+
 #define WIN_WIDTH_RATIO 70
 #define WIN_HEIGHT_RATIO 50
 
 /**
  * Functions declaration
 */
-WINDOW *create_newwin(int height, int width, int starty, int startx);
-void printMainOptionsInWindow(WINDOW *win, const char **options, int size);
-void updateWindow(WINDOW *win, const char **options, int size);
-void cleanWindowContent(WINDOW *win);
-WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*));
-void initMainWindow(WINDOW* win);
-void initBorderWindow(WINDOW* win);
-void keypadManager(int key);
 
 /**
  * Const string to print
@@ -26,7 +19,7 @@ const char** currentOptionsSet;
 int protectedFlag = 0;
 int passwordFlag = 0;
 
-char * localFilepath = "";
+const char * localFilepath;
 
 char interfacePassword[100] = "";
 
@@ -67,7 +60,7 @@ void init(int isProtected, int hasPassword){
 	int middlex = (getmaxx(stdscr) / 2) - 22;
 	//Create a new window in the middle of the terminal to print the figlet
 	WINDOW* figletWin = newwin(10, 86, 1, middlex);
-	wprintw(figletWin, figlet);
+	wprintw(figletWin,"%s",figlet);
 
     if(isProtected){
         mvprintw(7,1,"🔒 Zip protected.");
@@ -109,7 +102,7 @@ void printMainOptionsInWindow(WINDOW *win, const char **options, int size){
 	int middleX = getmaxx(win) / 2;
 	//Print the description of this window
 	const char* description = "Select an option (<- or ->) and press Enter";
-	mvwprintw(win, 1, middleX - (strlen(description) / 2), description);
+	mvwprintw(win, 1, middleX - (strlen(description) / 2), "%s", description);
 	//Compute the offset between each options horizontally in the local window
 	int offset = spaceBetweenEachOption(win, options);
 	// Little adjustment for main options, it's hard
@@ -123,12 +116,12 @@ void printMainOptionsInWindow(WINDOW *win, const char **options, int size){
 		if(i == selectedOption){
 			//Highlight the selected option
 			wattron(win, A_REVERSE);
-			mvwprintw(win, middleY, 1 + (i * offset), options[i]);
+			mvwprintw(win, middleY, 1 + (i * offset), "%s", options[i]);
 			wattroff(win, A_REVERSE);
 		}else{
 			wattron(win, A_BOLD);
 			wattron(win, A_UNDERLINE);
-			mvwprintw(win, middleY, 1 + (i * offset), options[i]);
+			mvwprintw(win, middleY, 1 + (i * offset), "%s",options[i]);
 			wattroff(win, A_UNDERLINE);
 			wattroff(win, A_BOLD);
 		}
@@ -146,7 +139,7 @@ void drawPasswordBox(WINDOW* win){
 		underline[i] = '-';
 	}
 	//Underline the password characters
-	mvwprintw(win, middleY + 1, 1, underline);
+	mvwprintw(win, middleY + 1, 1, "%s", underline);
 
 	//Borders for the password
 	//First Line
@@ -177,7 +170,7 @@ void printPasswordOptionsInWindow(WINDOW *win){
 	
 	//Print the description of this window
 	const char* description = "Enter your password here";
-	mvwprintw(win, 1, middleX - (strlen(description) / 2), description);
+	mvwprintw(win, 1, middleX - (strlen(description) / 2), "%s",description);
 	//Reallow the input buffering and echo user's input
 	nocbreak();
 	echo();
@@ -187,19 +180,19 @@ void printPasswordOptionsInWindow(WINDOW *win){
 	mvwgetnstr(win, middleY, 1, interfacePassword,100);
 	if(isPasswordCorrect(localFilepath, interfacePassword)){
 		char* passwordCorrectMessage = "Password correct! Zip file unlocked!";
-		mvwprintw(win, getmaxy(win) - 3, middleX - (strlen(passwordCorrectMessage) / 2), passwordCorrectMessage);
+		mvwprintw(win, getmaxy(win) - 3, middleX - (strlen(passwordCorrectMessage) / 2), "%s",passwordCorrectMessage);
 
 		char* indicationMessage = "Press Enter to continue.";
-		mvwprintw(win, getmaxy(win) - 2, middleX - (strlen(indicationMessage) / 2), indicationMessage);
+		mvwprintw(win, getmaxy(win) - 2, middleX - (strlen(indicationMessage) / 2), "%s",indicationMessage);
 
 		currentOptionsSet = MAIN_OPTIONS;
 	}
 	else{
 		char* passwordIncorrectMessage = "Password incorrect! Try again!";
-		mvwprintw(win, getmaxy(win) - 3, middleX - (strlen(passwordIncorrectMessage) / 2), passwordIncorrectMessage);
+		mvwprintw(win, getmaxy(win) - 3, middleX - (strlen(passwordIncorrectMessage) / 2), "%s",passwordIncorrectMessage);
 
 		char* indicationMessage = "Press Enter to continue.";
-		mvwprintw(win, getmaxy(win) - 2, middleX - (strlen(indicationMessage) / 2), indicationMessage);
+		mvwprintw(win, getmaxy(win) - 2, middleX - (strlen(indicationMessage) / 2), "%s",indicationMessage);
 	}
 
 	//And disable the input buffering and echo user's input
@@ -224,7 +217,7 @@ void updateWindow(WINDOW *win, const char **options, int size){
 	printMainOptionsInWindow(win, options, size);
 }
 
-WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*)){
+WINDOW* createGenericWindow(void(*winFunc)(WINDOW*)){
 	int startx, starty,width, height, termWidth, termHeight;
 	 
 	//Get the size of the terminal
@@ -256,7 +249,7 @@ WINDOW* createGenericWindow(WINDOW*(*winFunc)(WINDOW*)){
  * Application General utils functions
 */
 
-int charNumber(char** options){
+int charNumber(const char** options){
 	int number = 0;
 	for(int i = 1; i <= atoi(options[0]);i++){
 		number+=strlen(options[i]);
@@ -264,7 +257,7 @@ int charNumber(char** options){
 	return number;
 }
 
-int spaceBetweenEachOption(WINDOW* win, char** options){
+int spaceBetweenEachOption(WINDOW* win, const char** options){
 	int charNum = charNumber(options);
 	return (getmaxx(win) - charNum) / atoi(options[0]);
 }

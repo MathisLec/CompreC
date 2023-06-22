@@ -1,5 +1,4 @@
-#include "zipUtils.h"
-#include "main.h"
+#include "zipUtils_internal.h"
 
 /**
  * Internal functions
