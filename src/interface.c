@@ -38,11 +38,11 @@ int selectedOption = 1;
  * Init functions
 */
 
-void init(int isProtected, int hasPassword){
+void init(int isProtected, char* password){
 	protectedFlag = isProtected;
-	passwordFlag = hasPassword;
+	passwordFlag = strlen(password) > 0;
 
-	if(isProtected && !hasPassword)
+	if(isProtected && !passwordFlag)
 		currentOptionsSet = MAIN_OPTIONS_PROTECTED;
 	else
 		currentOptionsSet = MAIN_OPTIONS;
@@ -68,7 +68,7 @@ void init(int isProtected, int hasPassword){
     else{
         mvprintw(7,1,"🔓 Zip not protected.");
     }
-    if(hasPassword){
+    if(passwordFlag){
         mvprintw(8,1,"🔑 Password provided.");
     }
 
@@ -339,11 +339,11 @@ void closeApp(){
 	endwin();
 }
 
-void launchInterface(const char* filePath, int isProtected, int hasPassword){
+void launchInterface(const char* filePath, int isProtected, char* password){
     //Start curses mode
 	initscr();
 	localFilepath = filePath;
-	init(isProtected, hasPassword);
+	init(isProtected, password);
 	//Disable line buffering
 	cbreak();
 	//Don't show the user's input

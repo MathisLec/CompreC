@@ -1,1 +1,1 @@
-void launchInterface(const char* filepath, int isProtected, int hasPassword);
+void launchInterface(const char* filepath, int isProtected, char* password);

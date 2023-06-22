@@ -6,10 +6,11 @@ char* password = "";
 int isProtected = 0;
 
 void printUsage(){
-	printf("Usage: ./compreC [-h] [-f file]\n");
+	printf("Usage: ./compreC [-h] -f file [-p password]\n");
 	printf("Options:\n");
 	printf("\t-h\t\tShow this help message\n");
 	printf("\t-f file\t\tSpecify the file to open\n");
+	printf("\t-p password\tSpecify the password to use\n");
 }
 
 //Function that parse input options with getopt
@@ -42,6 +43,16 @@ void parseOpt(int argc, char** argv){
 void checkZip(){
 	if(isZipProtected(filepath)){
 		isProtected = 1;
+		if(password != ""){
+			if(isPasswordCorrect(filepath, password)){
+				printf("Password provided and correct\n");
+				exit(EXIT_SUCCESS);
+			}
+			else{
+				printf("Password provided but incorrect\n");
+				exit(EXIT_FAILURE);
+			}
+		}
 	}
 	else if(password != "")
 		printf("Password provided but the file is not protected\n");
@@ -58,6 +69,6 @@ int main(int argc, char *argv[])
 	//Parse options
 	parseOpt(argc, argv);
 	//Launch the interface
-	launchInterface(filepath,isProtected,(strlen(password) ? 1 : 0) );
+	launchInterface(filepath,isProtected,password);
 	return 0;
 }

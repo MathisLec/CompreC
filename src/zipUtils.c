@@ -50,7 +50,7 @@ int isPasswordCorrect(const char* filepath, const char* password){
         zip_stat_init(&fileStat);
         zip_stat_index(zip, i, 0, &fileStat);
         if(fileStat.encryption_method > 0){
-            if(zip_fopen_index_encrypted(zip, i, 0, password) != NULL){
+            if(zip_fopen_index_encrypted(zip, i, 0, password) == NULL){
                 isCorrect = 0;
                 break;
             }

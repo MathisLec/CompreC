@@ -6,7 +6,7 @@
 /**
  * Init functions
 */
-void init(int isProtected, int hasPassword);
+void init(int isProtected, char* password);
 void initBorderWindow(WINDOW* win);
 void initMainWindow(WINDOW* win);
 
