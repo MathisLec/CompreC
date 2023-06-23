@@ -219,6 +219,9 @@ void printPasswordOptionsInWindow(WINDOW *win){
 		currentOptionsSet = MAIN_OPTIONS;
 	}
 	else{
+		//Reset the buffer
+		memset(interfacePassword, 0, sizeof(interfacePassword));
+		//Prompt the user that the password is incorrect
 		char* passwordIncorrectMessage = "Password incorrect! Try again!";
 		mvwprintw(win, getmaxy(win) - 3, middleX - (strlen(passwordIncorrectMessage) / 2), "%s",passwordIncorrectMessage);
 
