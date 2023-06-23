@@ -13,8 +13,11 @@ void printUsage(){
 	printf("\t-p password\tSpecify the password to use\n");
 }
 
-//Function that parse input options with getopt
-
+/**
+ * parseOpt(int argc, char** argv)
+ * argc: number of arguments
+ * argv: array of arguments
+*/
 void parseOpt(int argc, char** argv){
 	int opt;
 	while((opt = getopt(argc, argv,"hf:p:")) != -1){
@@ -61,6 +64,12 @@ void checkZip(){
 
 /**
  * Main function
+*/
+/**
+ * int main(int argc, char *argv[])
+ * argc: number of arguments
+ * argv: array of arguments
+ * return: 0 if success, 1 if failure
 */
 int main(int argc, char *argv[])
 {

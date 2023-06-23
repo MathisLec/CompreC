@@ -38,6 +38,11 @@ int selectedOption = 1;
  * Init functions
 */
 
+/**
+ * init(int isProtected, char* password)
+ * isProtected: boolean to know if the zip is protected
+ * password: the password of the zip
+*/
 void init(int isProtected, char* password){
 	protectedFlag = isProtected;
 	passwordFlag = strlen(password) > 0;
@@ -78,11 +83,19 @@ void init(int isProtected, char* password){
 	wrefresh(figletWin);
 }
 
+/**
+ * initBorderWindow(WINDOW* win)
+ * win: the window to enhance
+*/
 void initBorderWindow(WINDOW* win)
 {	
 	box(win, 0 , 0);
 }
 
+/**
+ * initMainWindow(WINDOW* win)
+ * win: the window to enhance
+*/
 void initMainWindow(WINDOW* win){
 	printMainOptionsInWindow(win, currentOptionsSet, atoi(currentOptionsSet[0]));
 }
@@ -91,11 +104,21 @@ void initMainWindow(WINDOW* win){
  * Window utils functions
 */
 
+/**
+ * cleanWindowContent(WINDOW *win)
+ * win: the window to clean
+*/
 void cleanWindowContent(WINDOW *win){
 	wclear(win);
 	wrefresh(win);
 }
 
+/**
+ * printMainOptionsInWindow(WINDOW *win, const char **options, int size)
+ * win: the window to print in
+ * options: the options to print
+ * size: the size of the options array
+*/
 void printMainOptionsInWindow(WINDOW *win, const char **options, int size){
 	//Compute the middle of the local window
 	int middleY = getmaxy(win) / 2;
@@ -132,6 +155,10 @@ void printMainOptionsInWindow(WINDOW *win, const char **options, int size){
 	
 }
 
+/**
+ * drawPasswordBox(WINDOW* win)
+ * win: the window to draw in
+*/
 void drawPasswordBox(WINDOW* win){
 	int middleY = getmaxy(win) / 2;
 	char underline[1080] = "";
@@ -163,6 +190,10 @@ void drawPasswordBox(WINDOW* win){
 
 }
 
+/**
+ * printPasswordOptionsInWindow(WINDOW *win)
+ * win: the window to print in
+*/
 void printPasswordOptionsInWindow(WINDOW *win){
 	//Compute the middle of the local window
 	int middleY = getmaxy(win) / 2;
@@ -211,12 +242,23 @@ void printPasswordOptionsInWindow(WINDOW *win){
 	printMainOptionsInWindow(win, currentOptionsSet, atoi(currentOptionsSet[0]));
 }
 
+/**
+ * updateWindow(WINDOW *win, const char **options, int size)
+ * win: the window to update
+ * options: the options to print
+ * size: the size of the options array
+*/
 void updateWindow(WINDOW *win, const char **options, int size){
 
 	cleanWindowContent(win);
 	printMainOptionsInWindow(win, options, size);
 }
 
+/**
+ * createGenericWindow(void(*winFunc)(WINDOW*))
+ * winFunc: the function to enhance the window
+ * return: the enhanced window
+*/
 WINDOW* createGenericWindow(void(*winFunc)(WINDOW*)){
 	int startx, starty,width, height, termWidth, termHeight;
 	 
@@ -249,6 +291,11 @@ WINDOW* createGenericWindow(void(*winFunc)(WINDOW*)){
  * Application General utils functions
 */
 
+/**
+ * charNumber(const char** options)
+ * options: the options array to count
+ * return: the number of characters in the options array
+*/
 int charNumber(const char** options){
 	int number = 0;
 	for(int i = 1; i <= atoi(options[0]);i++){
@@ -257,6 +304,12 @@ int charNumber(const char** options){
 	return number;
 }
 
+/**
+ * spaceBetweenEachOption(WINDOW* win, const char** options)
+ * win: the window to compute the space
+ * options: the options array to count
+ * return: the space between each options
+*/
 int spaceBetweenEachOption(WINDOW* win, const char** options){
 	int charNum = charNumber(options);
 	return (getmaxx(win) - charNum) / atoi(options[0]);
@@ -298,6 +351,10 @@ void mainOptionsManager(){
 		}
 }
 
+/**
+ * keypadManager(int key)
+ * key: the key pressed by the user
+*/
 void keypadManager(int key){
 	switch (key)
 	{
@@ -339,6 +396,12 @@ void closeApp(){
 	endwin();
 }
 
+/**
+ * launchInterface(const char* filePath, int isProtected, char* password)
+ * filePath: the path of the zip file
+ * isProtected: boolean to know if the zip is protected
+ * password: the password of the zip
+*/
 void launchInterface(const char* filePath, int isProtected, char* password){
     //Start curses mode
 	initscr();

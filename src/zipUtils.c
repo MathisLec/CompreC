@@ -3,7 +3,11 @@
 /**
  * Internal functions
 */
-
+/**
+ * filePathToZip(const char* filepath)
+ * filepath: the path of the zip file
+ * return: a pointer to the zip structure
+*/
 struct zip* filePathToZip(const char* filepath){
     struct zip* zip = zip_open(filepath, ZIP_RDONLY, NULL);
     if (zip == NULL) {
@@ -18,7 +22,11 @@ struct zip* filePathToZip(const char* filepath){
  * Functions implementation
  * 
 */
-
+/**
+ * isZipProtected(const char* filepath)
+ * filepath: the path of the zip file
+ * return: 1 if the zip is protected, 0 otherwise
+*/
 int isZipProtected(const char* filepath){
     int isProtected = 0;
 
@@ -39,6 +47,12 @@ int isZipProtected(const char* filepath){
     return isProtected;
 }
 
+/**
+ * isPasswordCorrect(const char* filepath, const char* password)
+ * filepath: the path of the zip file
+ * password: the password to test
+ * return: 1 if the password is correct, 0 otherwise
+*/
 int isPasswordCorrect(const char* filepath, const char* password){
     int isCorrect = 1;
 
@@ -61,6 +75,12 @@ int isPasswordCorrect(const char* filepath, const char* password){
     return isCorrect;
 }
 
+/**
+ * openZip(const char* filepath, const char* password)
+ * filepath: the path of the zip file
+ * password: the password of the zip file
+ * return: a pointer to the zip structure
+*/
 struct zip* openZip(const char* filepath, const char* password){
     struct zip* zip = zip_open(filepath, ZIP_RDONLY, NULL);
     if (zip == NULL) {
