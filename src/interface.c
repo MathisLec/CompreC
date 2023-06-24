@@ -245,76 +245,29 @@ void printPasswordOptionsInWindow(WINDOW *win){
 	printMainOptionsInWindow(win, currentOptionsSet, atoi(currentOptionsSet[0]));
 }
 
-void bruteForce(WINDOW* win, const char* filePath){
-	//Compute the middle of the local window
+/**
+ * printCurrentBrutePassword(WINDOW* win, char* password)
+ * win: the window to print in
+ * password: the password to print
+*/
+void printCurrentBrutePassword(WINDOW* win, char* password){
 	int middleY = getmaxy(win) / 2;
 	int middleX = getmaxx(win) / 2;
-	//Print the description of this window
-	const char* description = "BruteForcing the password...";
-	mvwprintw(win, 1, middleX - (strlen(description) / 2), "%s",description);
+	wmove(win, middleY, middleX);
+	wclrtoeol(win);
+	wattron(win, A_BOLD);
+	mvwprintw(win, middleY, middleX -(strlen(password)/2), "%s",password);
+	wattroff(win, A_BOLD);
+	wrefresh(win);
+}
 
-	int bruteMaxSize = 100;
-	char currentPassword[100] = "a";
-	//Code that initialise the variable with all string combinations in loop
-	int i = 0;
-	while(i < bruteMaxSize){
-		//password Incrementation
-		if(currentPassword[i] == 'z'){
-			if(i>0){
-				int y = i - 1;
-				if(currentPassword[y] == 'z'){
-					while(currentPassword[y] == 'z'){
-						if(y > 0)
-							y--;
-						else
-							break;
-						currentPassword[y+1] = 'a';
-					}
-					if(y > 0){
-						currentPassword[y]++;
-					}
-					else if(y == 0){
-						if(currentPassword[y] == 'z'){
-							currentPassword[y] = 'a';
-							i++;
-						}
-						else{
-							currentPassword[y]++;
-						}
-					}
-					
-					currentPassword[i] = 'a';
-					currentPassword[i-1] = 'a';
-				}
-				else{
-					currentPassword[y]++;
-
-					currentPassword[i] = 'a';
-				}
-			}
-			else{
-				currentPassword[i] = 'a';
-				i++;
-				currentPassword[i] = 'a';
-			}
-		}
-		else{
-			currentPassword[i]++;
-		}
-		wmove(win, middleY, middleX);
-		wclrtoeol(win);
-		wattron(win, A_BOLD);
-		mvwprintw(win, middleY, middleX -(strlen(currentPassword)/2), "%s",currentPassword);
-		wattroff(win, A_BOLD);
-		wrefresh(win);
-		//Check if the password is correct
-		if(isPasswordCorrect(filePath, currentPassword)){
-			currentOptionsSet = MAIN_OPTIONS;
-			for(int j = 0; j <= i; j++)
-				interfacePassword[j] = currentPassword[j];
-			break;
-		}
-	}
+/**
+ * printFoundPassword(WINDOW* win)
+ * win: the window to print in
+*/
+void printFoundPassword(WINDOW* win){
+	int middleY = getmaxy(win) / 2;
+	int middleX = getmaxx(win) / 2;
 	wattron(win, A_BOLD);
 	wattron(win, A_UNDERLINE);
 	char* foundMessage = "Found! Press Enter to continue.";
@@ -329,6 +282,79 @@ void bruteForce(WINDOW* win, const char* filePath){
 	
 	cleanWindowContent(win);
 	printMainOptionsInWindow(win, currentOptionsSet, atoi(currentOptionsSet[0]));
+}
+
+/**
+ * bruteForce(WINDOW* win, const char* filePath)
+ * win: the window to print in
+ * filePath: the path of the zip file
+*/
+void bruteForce(WINDOW* win, const char* filePath){
+	//Compute the middle of the local window
+	int middleY = getmaxy(win) / 2;
+	int middleX = getmaxx(win) / 2;
+	//Print the description of this window
+	const char* description = "BruteForcing the password...";
+	mvwprintw(win, 1, middleX - (strlen(description) / 2), "%s",description);
+
+	int bruteMaxSize = 100;
+	char currentPassword[100] = "a";	
+	//Code that initialise the variable with all string combinations in loop
+	int i = 0;
+	while(i < bruteMaxSize){
+		//password Incrementation
+		if(currentPassword[i] == '~'){
+			if(i>0){
+				int y = i - 1;
+				if(currentPassword[y] == '~'){
+					while(currentPassword[y] == '~'){
+						if(y > 0)
+							y--;
+						else
+							break;
+						currentPassword[y+1] = ' ';
+					}
+					if(y > 0){
+						currentPassword[y]++;
+					}
+					else if(y == 0){
+						if(currentPassword[y] == '~'){
+							currentPassword[y] = ' ';
+							i++;
+						}
+						else{
+							currentPassword[y]++;
+						}
+					}
+					
+					currentPassword[i] = ' ';
+					currentPassword[i-1] = ' ';
+				}
+				else{
+					currentPassword[y]++;
+
+					currentPassword[i] = ' ';
+				}
+			}
+			else{
+				currentPassword[i] = ' ';
+				i++;
+				currentPassword[i] = ' ';
+			}
+		}
+		else{
+			currentPassword[i]++;
+		}
+		printCurrentBrutePassword(win, currentPassword);
+		//Check if the password is correct
+		if(isPasswordCorrect(filePath, currentPassword)){
+			currentOptionsSet = MAIN_OPTIONS;
+			for(int j = 0; j <= i; j++)
+				interfacePassword[j] = currentPassword[j];
+			break;
+		}
+	}
+	printFoundPassword(win);
 }
 
 /**
