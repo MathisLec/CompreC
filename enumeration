@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <zlib.h>
+#include <unistd.h>
+
+
+char* filepath = NULL;
+char* password = NULL;
+
+void enumerateFilesInZip(const char* zipPath) {
+    FILE* zipFile = fopen(zipPath, "rb");
+    if (zipFile == NULL) {
+        printf("Erreur lors de l'ouverture du fichier ZIP.\n");
+        return;
+    }
+
+    zip_fileinfo zipInfo;
+    zipOpen(zipFile, &zipInfo);
+
+    zip_fileinfo fileinfo;
+    char filename[MAX_FILENAME_LENGTH];
+
+    while (zipRead(zipFile, &fileinfo) == 0) {
+        zipGetFilename(zipFile, filename, MAX_FILENAME_LENGTH);
+        printf("%s\n", filename);
+    }
+
+    zipClose(zipFile);
+    fclose(zipFile);
+}
+
+void parseOpt(int argc, char** argv);
+
+int main(int argc, char* argv[]) {
+    parseOpt(argc, argv);  // Appel de la fonction parseOpt externe
+
+    if (filepath != NULL && strcmp(filepath, "") != 0) {
+        enumerateFilesInZip(filepath);
+    }
+
+    return 0;
+}
