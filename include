@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <zlib.h>
+#include <unistd.h>
+#include <ziputils.h>
+
+
+void includeFileInZip(const char* zipFilePath, const char* filePathToAdd) {
+    // Convertir le chemin du fichier zip en structure de données zip
+    zip_t* zip = pathtozip(zipFilePath);
+
+    // Vérifier si la conversion a réussi
+    if (zip == NULL) {
+        // Gérer l'erreur de conversion
+        printf("Erreur lors de la conversion du chemin du fichier zip en structure de données zip.\n");
+        return;
+    }
+
+    // Ajouter le fichier au fichier zip
+    if (addFile(zip, filePathToAdd) != ZIP_SUCCESS) {
+        // Gérer l'erreur lors de l'ajout du fichier
+        printf("Erreur lors de l'ajout du fichier au fichier zip.\n");
+        zip_close(zip); // Fermer le fichier zip
+        return;
+    }
+
+    // Fermer le fichier zip
+    zip_close(zip);
+
+    printf("Le fichier a été ajouté avec succès au fichier zip.\n");
+}
+
