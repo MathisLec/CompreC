@@ -18,7 +18,7 @@ void includeFileInZip(const char* zipFilePath, const char* filePathToAdd) {
     }
 
     // Ajouter le fichier au fichier zip
-    if (addFile(zip, filePathToAdd) != ZIP_SUCCESS) {
+    if (zip_file_add(zip, filePathToAdd) != ZIP_SUCCESS) {
         // Gérer l'erreur lors de l'ajout du fichier
         printf("Erreur lors de l'ajout du fichier au fichier zip.\n");
         zip_close(zip); // Fermer le fichier zip
