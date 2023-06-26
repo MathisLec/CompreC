@@ -4,6 +4,7 @@
 #include <zlib.h>
 #include <unistd.h>
 
+#define MAX_FILENAME_LENGTH 256
 
 char* filepath = NULL;
 char* password = NULL;
@@ -29,11 +30,6 @@ void enumerateFilesInZip(const char* zipPath) {
     zipClose(zipFile);
     fclose(zipFile);
 }
-
-void parseOpt(int argc, char** argv);
-
-int main(int argc, char* argv[]) {
-    parseOpt(argc, argv);  // Appel de la fonction parseOpt externe
 
     if (filepath != NULL && strcmp(filepath, "") != 0) {
         enumerateFilesInZip(filepath);
